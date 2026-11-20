@@ -1,5 +1,5 @@
 // Permite que la app abra sin internet. Cambia VERSION al publicar una actualización.
-const VERSION = 'pedidos-v2';
+const VERSION = 'pedidos-v4';
 const ASSETS = [
   './',
   './index.html',

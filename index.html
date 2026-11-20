@@ -237,9 +237,9 @@ ol.help li{margin:4px 0}
       </div>
       <div class="grid2 mt">
         <label>Umbral de unidades<input id="c-umbral" type="number" inputmode="numeric" min="0" step="1" placeholder="unidades"></label>
-        <label>Adicional por unidad sobre umbral<input id="c-extra" type="number" inputmode="decimal" min="0" step="any" placeholder="$"></label>
+        <label>Adicional por unidad sobre umbral<input id="c-extra" type="text" inputmode="decimal" autocomplete="off" placeholder="$"></label>
       </div>
-      <label class="mt">Retención boleta de honorario (15.25%)<input id="c-ret" type="number" inputmode="decimal" min="0" max="100" step="any" placeholder="%"></label>
+      <label class="mt">Retención boleta de honorario (15.25%)<input id="c-ret" type="text" inputmode="decimal" autocomplete="off" placeholder="%"></label>
       <p class="note">Los cambios se aplican a los pedidos que registres de aquí en adelante. Si quieres actualizar los pedidos registrados, haz click en "Aplicar tarifas a pedidos registrados".</p>
       <div id="c-err" class="err"></div>
       <div class="actions">
@@ -729,7 +729,8 @@ function cargarConf(){
   const c = S.config, ok = configurado();
   $('c-nombre').value = c.nombre||'';
   $('c-base').value = ok ? c.base : ''; $('c-sku').value = ok ? c.porSku : '';
-  $('c-umbral').value = ok ? c.umbral : ''; $('c-extra').value = ok ? c.porUnidadExtra : ''; $('c-ret').value = ok ? c.retencion : '';
+  const dec = v => String(v).replace('.', ',');   // en Chile se usa coma decimal
+  $('c-umbral').value = ok ? c.umbral : ''; $('c-extra').value = ok ? dec(c.porUnidadExtra) : ''; $('c-ret').value = ok ? dec(c.retencion) : '15,25';   // retención legal vigente por defecto
 }
 $('f-conf').addEventListener('submit', e => {
   e.preventDefault();
@@ -737,6 +738,10 @@ $('f-conf').addEventListener('submit', e => {
   for(const [id, nombre] of campos){
     if($(id).value.trim()===''){ $('c-err').textContent = 'Falta ingresar '+nombre+'.'; $(id).focus(); return; }
   }
+  // acepta coma o punto decimal (ej: 15,25 o 15.25)
+  const esDecimal = v => /^\s*\d+([.,]\d+)?\s*$/.test(v);
+  if(!esDecimal($('c-extra').value)){ $('c-err').textContent = 'El adicional por unidad debe ser un número (ej: 5 o 5,5).'; $('c-extra').focus(); return; }
+  if(!esDecimal($('c-ret').value)){ $('c-err').textContent = 'La retención debe ser un número (ej: 15,25).'; $('c-ret').focus(); return; }
   const ret = num($('c-ret').value);
   if(ret<0 || ret>100){ $('c-err').textContent = 'La retención debe estar entre 0 y 100.'; $('c-ret').focus(); return; }
   $('c-err').textContent = '';
